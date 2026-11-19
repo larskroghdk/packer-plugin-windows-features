@@ -1,0 +1,8 @@
+/dist/
+/reports/
+*.exe
+windows-features-report-*.json
+*.pkrvars.hcl
+!*.example.pkrvars.hcl
+*.log
+testResults.xml

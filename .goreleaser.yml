@@ -1,0 +1,37 @@
+version: 2
+project_name: packer-plugin-windows-features
+builds:
+  - env: [CGO_ENABLED=0]
+    goos: [windows]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w -X main.version={{ .Version }} -X main.versionPrerelease=
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    binary: '{{ .ProjectName }}_v{{ .Version }}_{{ .Env.API_VERSION }}_{{ .Os }}_{{ .Arch }}'
+archives:
+  - formats: [zip]
+    name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Env.API_VERSION }}_{{ .Os }}_{{ .Arch }}'
+    files: [LICENSE]
+checksum:
+  name_template: '{{ .ProjectName }}_v{{ .Version }}_SHA256SUMS'
+  algorithm: sha256
+signs:
+  - artifacts: checksum
+    args:
+      - --batch
+      - --local-user
+      - '{{ .Env.GPG_FINGERPRINT }}'
+      - --output
+      - ${signature}
+      - --detach-sign
+      - ${artifact}
+release:
+  draft: true
+  prerelease: auto
+snapshot:
+  version_template: '{{ .Version }}-dev'
+changelog:
+  sort: asc
+  filters:
+    exclude: ['^docs:', '^test:']

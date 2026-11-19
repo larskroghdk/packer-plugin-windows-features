@@ -1,0 +1,92 @@
+name: Check
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  go:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - uses: hashicorp/setup-packer@v3
+      - name: Go formatting, documentation and tests
+        shell: pwsh
+        run: |
+          if (gofmt -l .) { throw 'Run gofmt' }
+          go run ./cmd/doccheck .
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          go vet ./...
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          go test ./...
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          go test -tags integration ./test/integration
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Static analysis
+        run: |
+          go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
+          staticcheck ./...
+      - name: Guest documentation
+        shell: bash
+        run: sh ./psdoccheck.sh
+      - name: Check generated schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp provisioner/config.hcl2spec.go "$RUNNER_TEMP/schema.go"
+          go install github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc@$(go list -m -f '{{.Version}}' github.com/hashicorp/packer-plugin-sdk)
+          (cd provisioner && GOFILE=config.go GOPACKAGE=provisioner "$(go env GOPATH)/bin/packer-sdc" mapstructure-to-hcl2 -type Config)
+          gofmt -w provisioner/config.hcl2spec.go
+          diff -u "$RUNNER_TEMP/schema.go" provisioner/config.hcl2spec.go
+      - name: Check HCL formatting
+        shell: pwsh
+        run: |
+          packer fmt -check -recursive examples
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          packer fmt -check -recursive test/integration
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Build and validate local installation
+        shell: pwsh
+        run: |
+          $env:PACKER_PLUGIN_PATH = Join-Path $env:RUNNER_TEMP 'wf-plugins'
+          $binary = Join-Path $env:RUNNER_TEMP 'packer-plugin-windows-features'
+          if ($IsWindows) { $binary += '.exe' }
+          go build -trimpath -ldflags='-X main.versionPrerelease=' -o $binary .
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          packer plugins install --path $binary github.com/larskroghdk/windows-features
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          packer init test/integration
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          packer plugins installed
+          packer validate -var host=127.0.0.1 -var password=unused -var report_path=reports/check.json test/integration
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          foreach ($example in Get-ChildItem examples -Directory) {
+            packer init $example.FullName
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+            $arguments = @('validate', '-var', 'host=127.0.0.1', '-var', 'password=unused')
+            if ($example.Name -like '*netfx') { $arguments += @('-var', 'payload_source=D:/sources/sxs') }
+            & packer @arguments $example.FullName
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          }
+  powershell:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install analysis and test tools
+        shell: powershell
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -RequiredVersion 6.2.0 -Scope CurrentUser -Force -SkipPublisherCheck
+          Install-Module PSScriptAnalyzer -RequiredVersion 1.22.0 -Scope CurrentUser -Force
+      - name: Analyze and test Windows PowerShell 5.1 scripts
+        shell: powershell
+        run: |
+          $issues = 'guest/scripts', 'test/pester' | ForEach-Object { Invoke-ScriptAnalyzer -Path $_ -Recurse -Settings ./PSScriptAnalyzerSettings.psd1 }
+          $issues
+          if ($issues) { throw 'PSScriptAnalyzer failed' }
+          Import-Module Pester -RequiredVersion 6.2.0
+          Invoke-Pester -Path ./test/pester -Output Detailed -CI

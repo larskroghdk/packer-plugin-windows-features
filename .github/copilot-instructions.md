@@ -1,0 +1,1 @@
+Follow [AGENTS.md](../AGENTS.md) and [INVARIANTS.md](../INVARIANTS.md), the shared repository standards for all coding assistants. See the focused skills in `.agents/skills` for servicing, connectivity, Windows release support and release engineering changes.
