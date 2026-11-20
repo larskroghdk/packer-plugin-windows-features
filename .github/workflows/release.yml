@@ -1,10 +1,13 @@
 name: Release
+
 on:
   push:
-    tags: ['v*']
+    tags: ["v[0-9]*"]
   workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
   package:
     runs-on: ubuntu-latest
