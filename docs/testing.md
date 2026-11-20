@@ -1,4 +1,4 @@
-# Testing
+# 🧪 Testing
 
 Use the Go version in `go.mod` (automatic toolchain selection is supported), Packer, staticcheck 2025.1.1, PSScriptAnalyzer 1.22.0 and Pester 6.2.0. Guest tests must pass under Windows PowerShell 5.1, not only PowerShell 7.
 
@@ -17,7 +17,7 @@ if ($issues) { throw 'PSScriptAnalyzer failed' }
 
 `make check` runs these checks where GNU Make, POSIX utilities and the PowerShell tools are available. CI runs Go and mocked servicing tests on Windows. The fake guest covers orchestration without requiring administrator rights or changing host features. All guest `.ps1` files are ASCII with CRLF; the Go embedding test enforces this.
 
-## Packer smoke check
+## 💨 Packer smoke check
 
 Use an isolated installation directory to avoid changing your normal plugin installation:
 
@@ -32,7 +32,7 @@ packer validate -var host=127.0.0.1 -var password=unused -var report_path=report
 
 This validates SDK loading and HCL configuration without contacting a guest. Run `go test -race ./...` where a C compiler and the race runtime are available. For schema changes regenerate using `make generate`, then compare `provisioner/config.hcl2spec.go` with its previous contents; generated code should be reproducible.
 
-## Live integration
+## 🖥️ Live integration
 
 Live tests are build-tagged and skip unless `WF_TEST_HOST` is set. There is no public infrastructure or embedded password. Run against an authorized disposable VM with a checkpoint and a working elevated WinRM endpoint.
 

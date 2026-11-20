@@ -1,4 +1,4 @@
-# Releases
+# 🏷️ Releases
 
 Release automation does not publish anything during local development. Do not push a tag or publish without maintainer authorization.
 

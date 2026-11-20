@@ -1,4 +1,4 @@
-# Supported systems
+# 🪟 Supported systems
 
 | Guest target | Feature mechanism | Capabilities |
 | --- | --- | --- |
@@ -15,7 +15,7 @@ Nano Server, pre-14393 Windows, non-10 major versions, missing required servicin
 
 Feature availability varies with edition and hardware. Hyper-V requires a supported edition and virtualization extensions; a VM needs nested virtualization exposed by its host. Windows Home editions cannot install every feature available in Pro/Enterprise. Payloads and Features on Demand must match the guest version, architecture and language.
 
-## Validation status
+## 📊 Validation status
 
 Go unit and fake-communicator tests cover Server/client selection, request planning, installation/removal, idempotency, source errors, partial failures, timeouts, pending restart, reconnect checks and verification. Mocked PowerShell tests cover servicing command contracts under Windows PowerShell 5.1.
 

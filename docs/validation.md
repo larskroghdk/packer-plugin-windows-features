@@ -1,4 +1,4 @@
-# Local validation — 2026-11-19
+# 📋 Local validation — 2026-11-19
 
 Executed on a Windows amd64 development host with Go 1.26.10, Packer 1.16.2, GoReleaser 2.20.0, staticcheck 2025.1.1, PSScriptAnalyzer 1.22.0 and Pester 6.2.0 under Windows PowerShell 5.1.
 
@@ -19,7 +19,7 @@ Executed on a Windows amd64 development host with Go 1.26.10, Packer 1.16.2, GoR
 
 Snapshot mode used `0.0.0-dev` because this repository had no commits/tags. Stable local installation checks used a normal `1.0.0` build. Automatic Go toolchain network verification stalled during validation; the final checks used the already installed Go 1.26.10 toolchain and cached dependencies.
 
-## Checks still requiring infrastructure
+## 🏗️ Checks still requiring infrastructure
 
 - The live integration suite compiled and skipped because `WF_TEST_HOST` was not configured. No Windows Server or client release has been validated by a real servicing run here.
 - Real reboots, source-backed feature installations, Hyper-V/nested virtualization and builder-specific WinRM recovery require disposable Windows guests.

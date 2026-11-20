@@ -1,4 +1,4 @@
-# Contributing
+# 🤝 Contributing
 
 Read [AGENTS.md](AGENTS.md) and [INVARIANTS.md](INVARIANTS.md). Keep changes small and focused on feature servicing. Describe the concrete before/after behavior and how it was verified in each pull request.
 

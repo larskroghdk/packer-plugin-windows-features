@@ -1,4 +1,4 @@
-# Windows examples
+# 🧩 Windows examples
 
 Each directory is a separate template for one VM purpose. IIS and Hyper-V are never selected in the same template. These examples use an existing disposable Windows VM through Packer's built-in null builder; copy the relevant provisioner block into your actual image builder.
 

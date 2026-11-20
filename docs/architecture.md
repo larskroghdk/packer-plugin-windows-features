@@ -1,6 +1,6 @@
-# Architecture
+# 🏗️ Architecture
 
-## Foundation reviewed
+## 🔎 Foundation reviewed
 
 The sibling `packer-plugin-windows-optimize` supplied the architectural starting point: SDK `plugin.NewSet`, default provisioner registration, generated HCL2 schema, `Prepare` validation, JSON files exchanged over the Packer communicator, embedded PowerShell parts, Go-side planning, a fake guest implementing `packer.Communicator`, report generation, and reboot probes through the existing communicator.
 
@@ -8,7 +8,7 @@ This project reuses those patterns but has no dependency on the sibling reposito
 
 The source project's Windows-only packaging is retained for amd64 and arm64 targets. CI separates read-only checks from signed draft release creation. The configuration/schema, guest scripts and Go module are owned by this repository.
 
-## Components
+## 🧱 Components
 
 | Path | Responsibility |
 | --- | --- |
@@ -25,7 +25,7 @@ The source project's Windows-only packaging is retained for amd64 and arm64 targ
 | `test/pester` | Mocked guest contracts with no servicing changes. |
 | `test/integration` | Explicitly configured real-guest Packer tests. |
 
-## Run flow
+## 🔄 Run flow
 
 Upload → Detect → classify by product type/build/installation and available cmdlets → Inventory → resolve names/dependencies/protection/conflicts → stop on preflight failure or dry run → restart first if servicing is blocked and enabled → removals then installations → new inventory → verify requested states and record side effects → new WinRM probe → optional restart and re-verification → report and cleanup.
 

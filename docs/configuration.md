@@ -1,4 +1,4 @@
-# Configuration
+# ⚙️ Configuration
 
 At least one request is required. Names cannot be empty, duplicated across the same namespace, contain wildcards, or contradict another request. Unrecognized options fail preparation. A feature name is not interchangeable with a capability identity.
 
@@ -23,7 +23,7 @@ At least one request is required. Names cannot be empty, duplicated across the s
 
 Management-tools and all-subfeatures switches modify a necessary Server Manager operation. They do not independently reconcile children of an already-installed role. List required role services or tools explicitly to validate them and preserve idempotency.
 
-## Report contract
+## 📋 Report contract
 
 Schema version 1 includes `plugin`, start/finish times, duration, detected `system`, `summary`, per-request states, `side_effects`, `connectivity`, `reboot`, `warnings`, and `validation`. A failed run includes an `error` field and fails report validation even if the inventory was already compliant. Incompatible changes increment `schema_version`.
 
