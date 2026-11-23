@@ -3,3 +3,5 @@
 Makefile text eol=lf
 *.go text eol=lf
 *.ps1 text eol=crlf
+go.mod text eol=lf
+go.sum text eol=lf
