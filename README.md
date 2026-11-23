@@ -2,18 +2,18 @@
 
 Manage Windows Server roles and features, Windows client optional features, and Windows capabilities during Packer builds. The provisioner reads the guest inventory, plans changes, skips compliant requests, applies supported servicing cmdlets, and verifies the resulting state. It writes a JSON report on successful and failed runs.
 
-Build and release targets are Windows amd64 and arm64. Feature management applies only to Windows guests reached through WinRM with an elevated, 64-bit Windows PowerShell 5.1 session.
+Releases include binaries for Windows, Linux and macOS on amd64 and arm64, so Packer can run on any of them. Feature management applies only to Windows guests reached through WinRM with an elevated, 64-bit Windows PowerShell 5.1 session.
 
 ## 📦 Install
 
-Once a signed release is published to this repository, use:
+Install the signed release with:
 
 ```hcl
 packer {
   required_plugins {
     windows-features = {
       source  = "github.com/larskroghdk/windows-features"
-      version = ">= 1.0.0"
+      version = ">= 0.1.0"
     }
   }
 }
@@ -31,7 +31,7 @@ go build -trimpath -ldflags='-X main.versionPrerelease=' -o dist/packer-plugin-w
 packer plugins install --path ./dist/packer-plugin-windows-features.exe github.com/larskroghdk/windows-features
 ```
 
-Local builds advertise `1.0.0`, matching the examples' `>= 1.0.0` constraint. The SDK registers the default provisioner, so the HCL name is `windows-features`, without a repeated component suffix.
+Local builds advertise `0.1.0`, matching the examples' `>= 0.1.0` constraint. The SDK registers the default provisioner, so the HCL name is `windows-features`, without a repeated component suffix.
 
 ## 🚀 Use
 

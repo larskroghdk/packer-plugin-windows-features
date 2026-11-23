@@ -2,7 +2,7 @@ packer {
   required_plugins {
     windows-features = {
       source  = "github.com/larskroghdk/windows-features"
-      version = ">= 1.0.0"
+      version = ">= 0.1.0"
     }
   }
 }

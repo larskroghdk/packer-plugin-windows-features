@@ -6,7 +6,7 @@ The sibling `packer-plugin-windows-optimize` supplied the architectural starting
 
 This project reuses those patterns but has no dependency on the sibling repository. It replaces optimization catalogs, profiles, registry changes and rollback journals with Windows servicing inventories and desired feature states. Feature removal is not reliably reversible without payload media, so no automatic rollback is claimed.
 
-The source project's Windows-only packaging is retained for amd64 and arm64 targets. CI separates read-only checks from signed draft release creation. The configuration/schema, guest scripts and Go module are owned by this repository.
+Releases are packaged for Windows, Linux and macOS on amd64 and arm64, so the plugin runs wherever Packer runs; only the guest must be Windows. CI separates read-only checks from signed draft release creation. The configuration/schema, guest scripts and Go module are owned by this repository.
 
 ## 🧱 Components
 

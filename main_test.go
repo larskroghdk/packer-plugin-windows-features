@@ -24,7 +24,7 @@ func TestPluginDescribe(t *testing.T) {
 	if err := json.Unmarshal(output, &description); err != nil {
 		t.Fatal(err)
 	}
-	if description.Version != "1.0.0" || description.APIVersion == "" || len(description.Provisioners) != 1 || description.Provisioners[0] != "-packer-default-plugin-name-" {
+	if description.Version != "0.1.0" || description.APIVersion == "" || len(description.Provisioners) != 1 || description.Provisioners[0] != "-packer-default-plugin-name-" {
 		t.Fatalf("unexpected plugin description: %s", output)
 	}
 }

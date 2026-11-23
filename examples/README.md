@@ -22,7 +22,7 @@ packer validate examples/server-iis
 packer build examples/server-iis
 ```
 
-Every template uses `version = ">= 1.0.0"` and defaults to dry run. After reviewing the plan on an authorized disposable target, `packer build -var dry_run=false examples/server-iis` performs servicing and permits required restarts.
+Every template uses `version = ">= 0.1.0"` and defaults to dry run. After reviewing the plan on an authorized disposable target, `packer build -var dry_run=false examples/server-iis` performs servicing and permits required restarts.
 
 The .NET templates require a payload source matching the guest's release, architecture and language:
 
