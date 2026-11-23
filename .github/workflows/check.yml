@@ -30,10 +30,14 @@ jobs:
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           go test -tags integration ./test/integration
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
-      - name: Static analysis
+      - name: Module, static and vulnerability analysis
+        shell: bash
+        env:
+          GOTOOLCHAIN: local
         run: |
-          go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
-          staticcheck ./...
+          go mod tidy -diff
+          go run honnef.co/go/tools/cmd/staticcheck@2025.1.1 ./...
+          go run golang.org/x/vuln/cmd/govulncheck@v1.10.0 ./...
       - name: Guest documentation
         shell: bash
         run: sh ./psdoccheck.sh

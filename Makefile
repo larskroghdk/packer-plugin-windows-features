@@ -8,10 +8,12 @@ PESTER_SHELL ?= powershell.exe
 check: lint test
 
 lint:
+	go mod tidy -diff
 	@test -z "$$(gofmt -l .)" || (gofmt -l .; exit 1)
 	go vet ./...
 	go vet -tags integration ./test/integration
-	staticcheck ./...
+	go run honnef.co/go/tools/cmd/staticcheck@2025.1.1 ./...
+	go run golang.org/x/vuln/cmd/govulncheck@v1.10.0 ./...
 	go run ./cmd/doccheck .
 	sh ./psdoccheck.sh
 	pwsh -NoProfile -Command '$$ErrorActionPreference = "Stop"; $$r = "guest/scripts", "test/pester" | ForEach-Object { Invoke-ScriptAnalyzer -Path $$_ -Recurse -Settings ./PSScriptAnalyzerSettings.psd1 }; $$r; if ($$r) { exit 1 }'
