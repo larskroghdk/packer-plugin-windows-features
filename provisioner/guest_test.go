@@ -211,7 +211,7 @@ func (g *fakeGuest) run(command string) (int, string, bool) {
 	case strings.HasPrefix(command, "shutdown.exe /r"):
 		g.reboot()
 		return 0, "", false
-	case strings.Contains(command, "New-Item -ItemType Directory"), strings.Contains(command, "Remove-Item -LiteralPath"):
+	case strings.Contains(command, "[IO.Directory]::CreateDirectory"), strings.Contains(command, "Remove-Item -LiteralPath"):
 		return 0, "", false
 	}
 	m := actionPattern.FindStringSubmatch(command)
