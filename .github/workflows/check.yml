@@ -1,6 +1,7 @@
 name: Check
 
 on:
+  workflow_call:
   push:
     branches: [main]
   pull_request:
@@ -12,11 +13,11 @@ jobs:
   go:
     runs-on: windows-2025
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version-file: go.mod
-      - uses: hashicorp/setup-packer@v3
+      - uses: hashicorp/setup-packer@ce93c3c08a6c2ff2275bf4b54ff0d9a75f6c9789 # v3
       - name: Go formatting, documentation and tests
         shell: pwsh
         run: |
@@ -78,12 +79,12 @@ jobs:
   powershell:
     runs-on: windows-2025
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install analysis and test tools
         shell: powershell
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
-          Install-Module Pester -RequiredVersion 6.2.0 -Scope CurrentUser -Force -SkipPublisherCheck
+          Install-Module Pester -RequiredVersion 5.6.1 -Scope CurrentUser -Force -SkipPublisherCheck
           Install-Module PSScriptAnalyzer -RequiredVersion 1.22.0 -Scope CurrentUser -Force
       - name: Analyze and test Windows PowerShell 5.1 scripts
         shell: powershell
@@ -91,5 +92,33 @@ jobs:
           $issues = 'guest/scripts', 'test/pester' | ForEach-Object { Invoke-ScriptAnalyzer -Path $_ -Recurse -Settings ./PSScriptAnalyzerSettings.psd1 }
           $issues
           if ($issues) { throw 'PSScriptAnalyzer failed' }
-          Import-Module Pester -RequiredVersion 6.2.0
+          Import-Module Pester -RequiredVersion 5.6.1
           Invoke-Pester -Path ./test/pester -Output Detailed -CI
+
+  snapshot:
+    if: github.ref_type != 'tag'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version-file: go.mod
+      - name: Determine Packer plugin API version
+        run: |
+          go build -o "$RUNNER_TEMP/packer-plugin-windows-features" .
+          API_VERSION=$("$RUNNER_TEMP/packer-plugin-windows-features" describe | jq -er '.api_version | select(type == "string" and length > 0)')
+          echo "API_VERSION=$API_VERSION" >> "$GITHUB_ENV"
+      - name: Build unsigned snapshots
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+        with:
+          version: v2.18.2
+          args: release --snapshot --skip=publish,sign --clean
+      - name: Archive snapshots
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: plugin-snapshots
+          path: dist/
+          if-no-files-found: error

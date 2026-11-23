@@ -1,10 +1,10 @@
 ---
 name: release-plugin
-description: Prepare or review this plugin's GitHub Actions, semantic versioning, GoReleaser packaging and release documentation without implicitly publishing.
+description: Prepare, debug and verify CI, GoReleaser packaging and authorized signed plugin releases.
 ---
 
-Read `docs/releasing.md`, `.goreleaser.yml` and both workflows. Use the SDK's `describe` output for the API version. Preserve Packer's executable, archive, checksum and signature names and the source address without `packer-plugin-`.
+# Release Plugin
 
-Run available checks, schema repeatability, GoReleaser validation, both Windows architecture builds and native Packer install/HCL validation. Inspect snapshot archives/checksums. Snapshot mode tolerates missing Git history; real releases need an existing committed/tagged checkout. Do not create source history or tags as a side effect of a packaging check.
+Paths below are relative to the repository root.
 
-Keep PR checks read-only, signing secrets restricted to release jobs and releases draft pending review. Report which native OS and live guest checks actually ran. Updating automation does not authorize pushing tags, publishing, creating a remote repository or changing external infrastructure.
+Read `.github/workflows/release.yml`, the reusable check workflow, `.goreleaser.yml` or `.goreleaser.yaml`, and go.mod. Run project checks and generated-schema checks where defined. Use prebuilt pinned GoReleaser; build the API probe outside the checkout and derive API_VERSION from describe. Keep unsigned snapshots independent of secrets. Before authorized publication, verify the candidate, tag, existing assets and both signing-secret names. Never move tags or replace published assets without explicit authorization. Watch the release workflow, verify six ZIP checksums and the detached signature against the intended key, and run describe on a local-host binary. Vendor software releases and live guest operations require their own authorization.
