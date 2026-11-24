@@ -8,6 +8,7 @@
     Also checks PowerShell, Git, Pester, actionlint and whether core.hooksPath points at .githooks.
 
     -Live sends one minimal prompt to each installed agent, which proves authentication and costs a few tokens.
+    -Live refuses to run when an agent process started the script (AI_AGENT_ACTIVE is set), because agents may not start other agents.
     Exits 1 when Codex or the hooks are not ready, because commits are blocked without them. Gemini and Copilot are optional.
 
 .PARAMETER Live
@@ -21,7 +22,7 @@
 
 .NOTES
     Author  : Lars Krogh
-    Version : 1.0.0
+    Version : 1.1.0
 #>
 
 
@@ -113,6 +114,15 @@ function Get-FirstLine {
     if ($line) { $line.Trim() } else { '' }
 }
 
+if ($Live) {
+    try {
+        Assert-AINotNested
+    }
+    catch {
+        Write-AIMessage "Live check blocked: $($_.Exception.Message)"
+        exit 1
+    }
+}
 $root = Get-AIRepositoryRoot
 $settings = Get-AIConfiguration -RepositoryRoot $root
 $results = [Collections.Generic.List[object]]::new()

@@ -1007,33 +1007,45 @@ function ConvertTo-AIReview {
         Validates the JSON that Codex returned and converts it to a review.
 
     .DESCRIPTION
-        The review must have the verdict approve or reject, a summary, and findings with a known severity, a file, a line, a title, an impact and a remediation.
+        The JSON must match the review schema completely, including field types, the findings array and the absence of extra fields.
+        The review must also have the verdict approve or reject, a summary, and findings with a known severity, a file, a line, a title, an impact and a remediation.
         Anything else is rejected, so a malformed answer never counts as an approval.
 
     .PARAMETER Json
         The final message from Codex.
 
+    .PARAMETER SchemaPath
+        The JSON schema of the review, normally scripts/ai/review-schema.json, which Codex also receives as its output schema.
+
     .EXAMPLE
-        ConvertTo-AIReview -Json (Get-Content review.json -Raw)
+        ConvertTo-AIReview -Json (Get-Content review.json -Raw) -SchemaPath scripts/ai/review-schema.json
 
     .OUTPUTS
         System.Management.Automation.PSCustomObject
 
     .NOTES
         Author  : Lars Krogh
-        Version : 1.0.0
+        Version : 1.1.0
     #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
         [AllowEmptyString()]
-        [string]$Json
+        [string]$Json,
+        [Parameter(Mandatory)]
+        [string]$SchemaPath
     )
     try {
         $review = $Json | ConvertFrom-Json -ErrorAction Stop
     }
     catch {
         throw "Codex did not return valid JSON: $($_.Exception.Message)"
+    }
+    $schemaErrors = $null
+    $matchesSchema = Test-Json -Json $Json -SchemaFile $SchemaPath -ErrorAction SilentlyContinue -ErrorVariable schemaErrors
+    if (-not $matchesSchema) {
+        $reason = if ($schemaErrors) { $schemaErrors[0].Exception.Message } else { 'unknown schema error' }
+        throw "The Codex review does not match the review schema: $reason"
     }
     foreach ($name in 'verdict', 'summary', 'findings') {
         if (-not $review -or $review.PSObject.Properties.Name -notcontains $name) {
@@ -1136,7 +1148,7 @@ function Invoke-AIReviewGate {
                 continue
             }
             try {
-                $review = ConvertTo-AIReview -Json (Get-Content -LiteralPath $output -Raw)
+                $review = ConvertTo-AIReview -Json (Get-Content -LiteralPath $output -Raw) -SchemaPath $schema
             }
             catch {
                 $failure = $_.Exception.Message

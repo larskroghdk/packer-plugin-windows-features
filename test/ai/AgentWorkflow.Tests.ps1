@@ -250,7 +250,7 @@ Describe 'Pre-commit Codex gate' {
     }
     It 'fails closed when Codex <Mode>' -ForEach @(
         @{ Mode = 'fail'; Message = 'exited with code 1' }
-        @{ Mode = 'malformed'; Message = 'unknown verdict' }
+        @{ Mode = 'malformed'; Message = 'does not match the review schema' }
     ) {
         $env:FAKE_CODEX_MODE = $Mode
         Add-StagedChange -Name 'main.txt'
@@ -568,5 +568,42 @@ Describe 'Environment check' {
     It 'fails when the hooks are not installed' {
         $null = Invoke-Git config --unset core.hooksPath
         (Invoke-Script Test-AgentEnvironment.ps1).ExitCode | Should -Be 1
+    }
+    It 'refuses the live check without starting any agent when started by an agent process' {
+        $env:AI_AGENT_ACTIVE = '1'
+        try {
+            $result = Invoke-Script Test-AgentEnvironment.ps1 -Live
+        }
+        finally {
+            Remove-Item Env:AI_AGENT_ACTIVE
+        }
+        $result.ExitCode | Should -Be 1
+        $result.Output | Should -Match 'started by an agent process'
+        foreach ($agent in 'codex', 'gemini', 'copilot') {
+            if (Test-Path -LiteralPath $log) {
+                @(Get-Content -LiteralPath $log | Where-Object { $_ -like "$agent *" }).Count | Should -Be 0
+            }
+        }
+    }
+}
+
+Describe 'Review validation' {
+    BeforeAll {
+        . (Join-Path $sourceRoot 'scripts/ai/AgentTools.ps1')
+        $script:schema = Join-Path $sourceRoot 'scripts/ai/review-schema.json'
+    }
+    It 'accepts a review that matches the schema' {
+        $json = '{"verdict":"approve","summary":"ok","findings":[{"severity":"low","file":"a.go","line":3,"title":"t","impact":"i","remediation":"r"}]}'
+        (ConvertTo-AIReview -Json $json -SchemaPath $schema).verdict | Should -Be 'approve'
+    }
+    It 'rejects an approval with <Case>' -ForEach @(
+        @{ Case = 'a numeric summary'; Json = '{"verdict":"approve","summary":5,"findings":[]}' }
+        @{ Case = 'a boolean file'; Json = '{"verdict":"approve","summary":"ok","findings":[{"severity":"low","file":true,"line":3,"title":"t","impact":"i","remediation":"r"}]}' }
+        @{ Case = 'a string line'; Json = '{"verdict":"approve","summary":"ok","findings":[{"severity":"low","file":"a.go","line":"3","title":"t","impact":"i","remediation":"r"}]}' }
+        @{ Case = 'findings that are not an array'; Json = '{"verdict":"approve","summary":"ok","findings":{"severity":"low"}}' }
+        @{ Case = 'an extra field'; Json = '{"verdict":"approve","summary":"ok","findings":[],"approved":true}' }
+        @{ Case = 'a JSON array'; Json = '[{"verdict":"approve","summary":"ok","findings":[]}]' }
+    ) {
+        { ConvertTo-AIReview -Json $Json -SchemaPath $schema } | Should -Throw '*does not match the review schema*'
     }
 }
