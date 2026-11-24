@@ -1,1 +1,8 @@
 blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/larskroghdk/packer-plugin-windows-features/security/advisories/new
+    about: Report suspected vulnerabilities privately instead of opening a public issue.
+  - name: Troubleshooting guide
+    url: https://github.com/larskroghdk/packer-plugin-windows-features/blob/main/docs/troubleshooting.md
+    about: Common servicing errors, missing payload sources and pending restarts.

@@ -1,0 +1,170 @@
+name: Bug report
+description: A request ended in the wrong state, the run failed unexpectedly, or the Packer session broke.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Issues are public. Remove passwords, tokens, certificates, host names, IP addresses, domain names and internal share paths from everything you paste. The JSON report records the WinRM user name in `system.winrm_user`; redact it if it's sensitive.
+
+        Report suspected vulnerabilities privately through the [security policy](https://github.com/larskroghdk/packer-plugin-windows-features/security/policy), not here.
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin version
+      description: Output of `packer plugins installed`, or the commit for a local build.
+      placeholder: v0.1.0
+    validations:
+      required: true
+  - type: input
+    id: packer-version
+    attributes:
+      label: Packer version
+      description: Output of `packer version`.
+      placeholder: Packer v1.16.2
+    validations:
+      required: true
+  - type: dropdown
+    id: guest-release
+    attributes:
+      label: Guest release
+      options:
+        - Windows Server 2016
+        - Windows Server 2019
+        - Windows Server 2022
+        - Windows Server 2025
+        - Windows 10
+        - Windows 11
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: guest-build
+    attributes:
+      label: Edition, version, build and installation type
+      description: For example from `Get-ComputerInfo -Property WindowsEditionId, OsVersion, OsBuildNumber, WindowsInstallationType`, or the `system` section of the report.
+      placeholder: ServerDatacenter, 10.0.20348, build 20348.2849, Server Core
+    validations:
+      required: true
+  - type: input
+    id: builder
+    attributes:
+      label: Packer builder
+      placeholder: hyperv-iso, vsphere-iso, azure-arm, null
+    validations:
+      required: true
+  - type: dropdown
+    id: communicator
+    attributes:
+      label: WinRM transport
+      description: The plugin requires the WinRM communicator.
+      options:
+        - WinRM over HTTPS
+        - WinRM over HTTP
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: namespace
+    attributes:
+      label: Request type
+      multiple: true
+      options:
+        - Server role or feature (`install`, `remove`)
+        - Client optional feature (`install`, `remove`)
+        - Capability (`install_capabilities`, `remove_capabilities`)
+    validations:
+      required: true
+  - type: input
+    id: names
+    attributes:
+      label: Affected features, roles or capabilities
+      description: Exact names as requested, and any dependency or side effect involved.
+      placeholder: Web-Server, Web-Mgmt-Tools; side effect Web-WebServer
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Provisioner configuration
+      description: The `windows-features` provisioner block. Remove secrets.
+      render: hcl
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Installation source
+      options:
+        - No `source` (Windows Update or local component store)
+        - Local path or mounted media
+        - Network share
+        - Features on Demand media
+        - Not applicable (removal only)
+    validations:
+      required: true
+  - type: dropdown
+    id: restart
+    attributes:
+      label: Restart behavior
+      options:
+        - No restart needed
+        - Restart pending at the end of the run
+        - The plugin restarted the guest (`restart_if_required = true`)
+        - Restarted by another provisioner
+        - The guest restarted unexpectedly
+    validations:
+      required: true
+  - type: dropdown
+    id: session
+    attributes:
+      label: Did the Packer or WinRM session break?
+      options:
+        - "No"
+        - Yes, during servicing
+        - Yes, after a restart
+        - Yes, at another point
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Start from a clean guest image where possible.
+      placeholder: |
+        1. Build Windows Server 2022 Core from the evaluation ISO.
+        2. Run the provisioner above.
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the request status from the report, such as `failed`, `pending_reboot` or `not_attempted`, and the error message.
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: JSON report
+      description: The relevant `requests`, `side_effects`, `connectivity`, `reboot`, `warnings` and `error` fields, or the whole file. Redact it first.
+      render: json
+  - type: textarea
+    id: log
+    attributes:
+      label: Packer log
+      description: The relevant part of a run with `PACKER_LOG=1`. Redact it first.
+      render: text
+  - type: textarea
+    id: servicing-log
+    attributes:
+      label: Servicing logs
+      description: Related entries from `C:\Windows\Logs\CBS\CBS.log` or `C:\Windows\Logs\DISM\dism.log`, if you collected them.
+      render: text

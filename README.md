@@ -79,5 +79,6 @@ Removals of PowerShell and its .NET runtime are blocked, including known transit
 - [Troubleshooting](docs/troubleshooting.md)
 - [Testing](docs/testing.md) and [releasing](docs/releasing.md)
 - [Contributing](CONTRIBUTING.md)
+- [Security policy](.github/SECURITY.md)
 
 Built with the [HashiCorp Packer Plugin SDK](https://developer.hashicorp.com/packer/docs/plugins/creation). Licensed under [MPL 2.0](LICENSE).

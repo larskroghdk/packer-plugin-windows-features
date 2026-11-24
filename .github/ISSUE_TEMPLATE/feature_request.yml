@@ -1,0 +1,58 @@
+name: Feature request
+description: Suggest a configuration option, protection rule, Windows release or report change.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The plugin installs, removes and verifies Server roles and features, client optional features and capabilities through the supported servicing cmdlets. It doesn't tune the registry, apply optimization profiles or roll back servicing. Requests that fit that scope are most likely to be accepted.
+
+        Issues are public. Don't include credentials, host names or other details of your infrastructure.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - Configuration option
+        - Protection rule for the Packer or WinRM session
+        - Windows release or edition support
+        - Report or console output
+        - Documentation or example
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What you're trying to do, and why the plugin doesn't support it today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: How it could work, including an example provisioner block if it adds or changes options.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: names
+    attributes:
+      label: Features, roles or capabilities involved
+      placeholder: Hyper-V, RSAT-Hyper-V-Tools, OpenSSH.Server~~~~0.0.1.0
+  - type: input
+    id: releases
+    attributes:
+      label: Windows releases and editions
+      placeholder: Windows Server 2025 Datacenter, Server Core and Desktop Experience
+  - type: textarea
+    id: impact
+    attributes:
+      label: Dependencies, restarts and session impact
+      description: Known dependencies or payload sources, whether a restart is needed, and whether the change can affect networking, authentication or WinRM during the build.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Workarounds you use today, such as a separate PowerShell provisioner.
