@@ -6,12 +6,12 @@ Use the Go version in `go.mod` (automatic toolchain selection is supported), Pac
 go mod tidy -diff
 go test ./...
 go vet ./...
-go run honnef.co/go/tools/cmd/staticcheck@2025.1.1 ./...
+$env:GOTOOLCHAIN = go env GOVERSION; go run honnef.co/go/tools/cmd/staticcheck@2025.1.1 ./...; Remove-Item Env:GOTOOLCHAIN
 go run golang.org/x/vuln/cmd/govulncheck@v1.10.0 ./...
 go run ./cmd/doccheck .
 packer fmt -check -recursive examples
 packer fmt -check -recursive test/integration
-powershell.exe -NoProfile -Command 'Import-Module Pester -MinimumVersion 5.0; Invoke-Pester -Path ./test/pester -Output Detailed -CI'
+powershell.exe -NoProfile -Command '$ErrorActionPreference = "Stop"; Import-Module Pester -MinimumVersion 5.0; Invoke-Pester -Path ./test/pester -Output Detailed -CI'
 $issues = 'guest/scripts','test/pester' | ForEach-Object { Invoke-ScriptAnalyzer -Path $_ -Recurse -Settings ./PSScriptAnalyzerSettings.psd1 }
 $issues
 if ($issues) { throw 'PSScriptAnalyzer failed' }

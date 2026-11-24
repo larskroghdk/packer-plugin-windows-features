@@ -4,7 +4,7 @@ PACKER_SDC_VERSION := $(shell go list -m -f '{{.Version}}' github.com/hashicorp/
 API_VERSION = $(shell go run . describe | sed -n 's/.*"api_version":"\([^"]*\)".*/\1/p')
 PESTER_SHELL ?= powershell.exe
 
-.PHONY: check lint test test-go test-ps test-integration build generate generate-check release-snapshot
+.PHONY: check lint test test-go test-ps test-ai test-integration build generate generate-check release-snapshot
 check: lint test
 
 lint:
@@ -12,7 +12,7 @@ lint:
 	@test -z "$$(gofmt -l .)" || (gofmt -l .; exit 1)
 	go vet ./...
 	go vet -tags integration ./test/integration
-	go run honnef.co/go/tools/cmd/staticcheck@2025.1.1 ./...
+	GOTOOLCHAIN=$$(go env GOVERSION) go run honnef.co/go/tools/cmd/staticcheck@2025.1.1 ./...
 	go run golang.org/x/vuln/cmd/govulncheck@v1.10.0 ./...
 	go run ./cmd/doccheck .
 	sh ./psdoccheck.sh
@@ -20,11 +20,14 @@ lint:
 	packer fmt -check -recursive examples
 	packer fmt -check -recursive test/integration
 
-test: test-go test-ps
+test: test-go test-ps test-ai
 test-go:
 	go test ./...
 test-ps:
-	$(PESTER_SHELL) -NoProfile -ExecutionPolicy Bypass -Command 'Import-Module Pester -MinimumVersion 5.0; Invoke-Pester -Path ./test/pester -Output Detailed -CI'
+	$(PESTER_SHELL) -NoProfile -ExecutionPolicy Bypass -Command '$$ErrorActionPreference = "Stop"; Import-Module Pester -MinimumVersion 5.0; Invoke-Pester -Path ./test/pester -Output Detailed -CI'
+test-ai:
+	pwsh -NoProfile -Command '$$ErrorActionPreference = "Stop"; $$r = "scripts/ai", "test/ai" | ForEach-Object { Invoke-ScriptAnalyzer -Path $$_ -Recurse -Severity Warning, Error }; $$r; if ($$r) { exit 1 }'
+	pwsh -NoProfile -Command '$$ErrorActionPreference = "Stop"; Import-Module Pester -MinimumVersion 5.6.1; $$c = New-PesterConfiguration; $$c.Run.Path = "test/ai"; $$c.Run.Exit = $$true; $$c.Output.Verbosity = "Normal"; Invoke-Pester -Configuration $$c'
 test-integration:
 	go test -tags integration -v -count=1 -timeout 90m ./test/integration
 build:
